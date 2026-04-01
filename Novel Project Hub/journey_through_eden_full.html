@@ -1,0 +1,1117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>The Journey Through Eden — Decaying Winter</title>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Crimson+Text:ital,wght@0,400;0,600;1,400&family=Share+Tech+Mono&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --agency:   #00B4D8;
+      --agency-dim: #006880;
+      --cold:     #8ECAE6;
+      --objective: #FFD166;
+      --planet:  #2124bc;
+      --safe:     #4ADE80;
+      --warn:     #ff9603;
+      --danger:   #e61728;
+      --reikgon:  #530707;
+      --bone:     #D4CFC7;
+      --ash:      #2A2722;
+      --void:     #080A0C;
+      --panel:    #0E1318;
+      --border:   rgba(0,180,216,0.2);
+      --snow:     #CDD9E0;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin:0; padding:0; }
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--void);
+      color: var(--bone);
+      font-family: 'Crimson Text', Georgia, serif;
+      font-size: 1.12rem;
+      line-height: 1.9;
+      overflow-x: hidden;
+    }
+
+    /* NOISE */
+    body::before {
+      content:'';
+      position:fixed; inset:0; pointer-events:none; z-index:9999;
+      background: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E");
+      opacity:.4;
+    }
+
+    /* SNOW PARTICLES */
+    .snow { position:fixed; inset:0; pointer-events:none; z-index:1; overflow:hidden; }
+    .flake {
+      position:absolute; top:-8px;
+      background:rgba(205,217,224,0.55);
+      border-radius:50%;
+      animation: snowfall linear infinite;
+    }
+    @keyframes snowfall { to { transform: translateY(105vh) translateX(var(--d)); opacity:0; } }
+
+    /* SCANLINES */
+    body::after {
+      content:''; position:fixed; inset:0; pointer-events:none; z-index:9998;
+      background: repeating-linear-gradient(
+        to bottom,
+        transparent 0px,
+        transparent 3px,
+        rgba(0,0,0,0.04) 3px,
+        rgba(0,0,0,0.04) 4px
+      );
+    }
+
+    /* ── HERO ── */
+    .hero {
+      min-height: 100vh;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      text-align: center;
+      position: relative; overflow: hidden;
+      padding: 4rem 2rem;
+    }
+
+    .hero-bg {
+      position:absolute; inset:0;
+      background:
+        radial-gradient(ellipse 70% 50% at 50% 80%, rgba(0,60,90,0.4) 0%, transparent 70%),
+        radial-gradient(ellipse 100% 60% at 50% 110%, rgba(0,100,130,0.12) 0%, transparent 60%),
+        linear-gradient(180deg, #060810 0%, #080C12 50%, #060810 100%);
+    }
+
+    /* Horizontal scan effect */
+    .hero-scan {
+      position:absolute; inset:0; pointer-events:none;
+      background: linear-gradient(transparent 0%, rgba(0,180,216,0.03) 50%, transparent 100%);
+      background-size: 100% 200%;
+      animation: scan 6s linear infinite;
+    }
+    @keyframes scan { from { background-position: 0 -100%; } to { background-position: 0 300%; } }
+
+    .agency-badge {
+      font-family: 'Orbitron', monospace;
+      font-size: 0.6rem;
+      letter-spacing: 0.5em;
+      color: var(--agency);
+      text-transform: uppercase;
+      margin-bottom: 1.5rem;
+      position: relative; z-index:2;
+      animation: fadeUp 1s ease both 0.3s;
+      display: flex; align-items: center; gap: 1rem;
+    }
+    .agency-badge::before, .agency-badge::after {
+      content:''; width:40px; height:1px;
+      background: linear-gradient(to right, transparent, var(--agency));
+    }
+    .agency-badge::after { background: linear-gradient(to left, transparent, var(--agency)); }
+
+    .hero-title {
+      font-family: 'Orbitron', monospace;
+      font-weight: 900;
+      font-size: clamp(2rem, 7vw, 5rem);
+      line-height: 1.1;
+      color: var(--snow);
+      letter-spacing: -0.02em;
+      position: relative; z-index:2;
+      animation: fadeUp 1s ease both 0.5s;
+      text-shadow: 0 0 40px rgba(0,180,216,0.3), 0 0 80px rgba(0,180,216,0.1);
+    }
+
+    .hero-sub {
+      font-family: 'Orbitron', monospace;
+      font-size: clamp(0.7rem, 1.5vw, 1rem);
+      color: var(--agency);
+      letter-spacing: 0.25em;
+      text-transform: uppercase;
+      margin-top: 0.8rem;
+      position: relative; z-index:2;
+      animation: fadeUp 1s ease both 0.7s;
+    }
+
+    .hero-tagline {
+      font-style: italic;
+      color: rgba(212,207,199,0.55);
+      max-width: 520px;
+      margin-top: 2rem;
+      font-size: 1.05rem;
+      position: relative; z-index:2;
+      animation: fadeUp 1s ease both 1s;
+    }
+
+    /* AGENT WATCH HUD */
+    .hud {
+      margin-top: 3rem;
+      position: relative; z-index:2;
+      display: flex; gap: 1.5rem; flex-wrap: wrap; justify-content: center;
+      animation: fadeUp 1s ease both 1.2s;
+    }
+    .hud-stat {
+      background: rgba(0,20,30,0.8);
+      border: 1px solid var(--border);
+      padding: 0.6rem 1.2rem;
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 0.72rem;
+      color: var(--agency);
+      letter-spacing: 0.1em;
+    }
+    .hud-stat span { color: var(--warn); }
+    .hud-stat.ok span { color: var(--safe); }
+    .hud-stat.crit span { color: var(--danger); }
+    .hud-stat.planet span { color: var(--planet); }
+    .hud-stat.objective span { color: var(--objective); }
+
+    .scroll-cue {
+      position:absolute; bottom:2rem; left:50%; transform:translateX(-50%);
+      display:flex; flex-direction:column; align-items:center; gap:0.5rem;
+      color:rgba(0,180,216,0.3); font-family:'Share Tech Mono',monospace; font-size:0.65rem;
+      letter-spacing:0.25em; z-index:2;
+      animation: pulse 2s infinite;
+    }
+    .scroll-cue-line { width:1px; height:36px; background:linear-gradient(to bottom, var(--agency-dim), transparent); }
+
+    /* ── LAYOUT ── */
+    .container { max-width:800px; margin:0 auto; padding:0 2rem; }
+
+    /* ── CHAPTER SECTIONS ── */
+    .chapter {
+      padding: 5rem 0 2rem;
+      opacity:0; transform:translateY(24px);
+      transition: opacity 0.7s ease, transform 0.7s ease;
+    }
+    .chapter.vis { opacity:1; transform:translateY(0); }
+
+    .ch-header {
+      display:flex; align-items:center; gap:1.5rem;
+      margin-bottom: 2.5rem;
+    }
+    .ch-num {
+      font-family:'Orbitron',monospace;
+      font-size:3rem; font-weight:900;
+      color:rgba(0,180,216,0.12);
+      line-height:1; flex-shrink:0;
+    }
+    .ch-meta { flex:1; }
+    .ch-label {
+      font-family:'Share Tech Mono',monospace;
+      font-size:0.65rem; letter-spacing:0.4em;
+      color:var(--agency); text-transform:uppercase;
+      margin-bottom:0.3rem;
+    }
+    .ch-title {
+      font-family:'Orbitron',monospace;
+      font-weight:700;
+      font-size:clamp(1.1rem, 2.5vw, 1.7rem);
+      color:var(--snow);
+      line-height:1.2;
+    }
+
+    /* prose */
+    .prose p { color:rgba(212,207,199,0.85); margin-bottom:1.3rem; }
+    .prose p em { color:var(--cold); font-style:italic; }
+    .prose p strong { color:var(--snow); }
+    .prose p .tag { color:var(--agency); font-family:'Share Tech Mono',monospace; font-size:0.85rem; }
+
+    /* DIALOGUE */
+    .dialogue {
+      margin: 1.5rem 0;
+      padding: 1.2rem 1.6rem;
+      border-left: 3px solid rgba(0,180,216,0.4);
+      background: rgba(0,20,35,0.5);
+      font-style: italic;
+      color: var(--snow);
+      font-size: 1.05rem;
+    }
+    .dialogue .speaker {
+      font-style: normal;
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 0.72rem;
+      color: var(--agency);
+      letter-spacing: 0.2em;
+      display: block;
+      margin-bottom: 0.4rem;
+    }
+
+    /* AGENT WATCH TERMINAL */
+    .terminal {
+      background: rgba(4,12,18,0.95);
+      border: 1px solid rgba(0,180,216,0.25);
+      border-top: 2px solid var(--agency);
+      padding: 1.5rem;
+      margin: 2rem 0;
+      font-family:'Share Tech Mono',monospace;
+      font-size:0.8rem;
+      position:relative;
+    }
+    .terminal::before {
+      content: attr(data-label);
+      position:absolute; top:-0.65rem; left:1rem;
+      background: var(--void); padding:0 0.5rem;
+      color:var(--agency); font-size:0.65rem; letter-spacing:0.25em;
+      text-transform:uppercase;
+    }
+    .terminal .t-line { margin-bottom:0.22rem; line-height:1.6; }
+    .t-ok   { color:#4ADE80; }
+    .t-warn { color:var(--warn); }
+    .t-crit { color:var(--danger); }
+    .t-info { color:var(--cold); }
+    .t-safe { color:var(--safe); }
+    .t-reikgon { color:var(--reikgon); }
+    .t-objective { color:var(--objective); }
+    .t-mute { color:rgba(212,207,199,0.35); }
+    .t-line::before { content:'> '; color:rgba(0,180,216,0.4); }
+    .t-cursor::after { content:'_'; animation:blink 1s step-end infinite; color:var(--agency); }
+    @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
+
+    /* DIVIDER */
+    .divider {
+      display:flex; align-items:center; gap:1rem;
+      margin:3rem 0;
+      opacity:0.25;
+    }
+    .divider-line { flex:1; height:1px; background:var(--agency-dim); }
+    .divider-diamond {
+      width:8px; height:8px;
+      border:1px solid var(--agency);
+      transform:rotate(45deg);
+    }
+
+    /* LORE BOX */
+    .lore-box {
+      border: 1px solid rgba(0,180,216,0.15);
+      background: rgba(0,12,20,0.6);
+      padding: 1.5rem;
+      margin: 2rem 0;
+      position:relative;
+    }
+    .lore-box::before {
+      content:'';
+      position:absolute; top:0; left:0;
+      width:3px; height:100%;
+      background: linear-gradient(to bottom, var(--agency), var(--agency-dim));
+    }
+    .lore-box-title {
+      font-family:'Orbitron',monospace;
+      font-size:0.75rem; letter-spacing:0.2em;
+      color:var(--agency); text-transform:uppercase;
+      margin-bottom:1rem; padding-left:0.8rem;
+    }
+    .lore-box p { color:rgba(212,207,199,0.7); font-size:0.95rem; margin-bottom:0.8rem; padding-left:0.8rem; }
+    .lore-box p:last-child { margin-bottom:0; }
+
+    /* CHARACTERS GRID */
+    .char-grid {
+      display:grid; grid-template-columns:repeat(auto-fill, minmax(210px,1fr));
+      gap:1rem; margin:2rem 0;
+    }
+    .char-card {
+      background:rgba(0,14,22,0.8);
+      border:1px solid rgba(0,180,216,0.12);
+      padding:1.2rem;
+      position:relative;
+      transition:border-color 0.3s, transform 0.3s;
+    }
+    .char-card:hover { border-color:rgba(0,180,216,0.45); transform:translateY(-3px); }
+    .char-card::after {
+      content:''; position:absolute;
+      bottom:0; left:0; right:0; height:1px;
+      background:linear-gradient(to right, var(--agency-dim), transparent);
+    }
+    .char-role {
+      font-family:'Share Tech Mono',monospace;
+      font-size:0.62rem; letter-spacing:0.2em;
+      color:var(--agency); text-transform:uppercase; margin-bottom:0.3rem;
+    }
+    .char-name {
+      font-family:'Orbitron',monospace; font-weight:700;
+      font-size:0.9rem; color:var(--snow); margin-bottom:0.6rem;
+    }
+    .char-desc { font-size:0.88rem; color:rgba(212,207,199,0.6); line-height:1.5; }
+    .char-status {
+      margin-top:0.8rem;
+      font-family:'Share Tech Mono',monospace;
+      font-size:0.62rem; letter-spacing:0.1em;
+    }
+    .status-active { color:#4ADE80; }
+    .status-unknown { color:var(--warn); }
+    .status-hostile { color:var(--danger); }
+
+    /* FACTION ROWS */
+    .faction {
+      display:flex; gap:1.2rem; align-items:flex-start;
+      border:1px solid rgba(0,180,216,0.1);
+      background:rgba(0,10,16,0.7); padding:1.2rem; margin:1rem 0;
+      transition: border-color 0.3s;
+    }
+    .faction:hover { border-color:rgba(0,180,216,0.3); }
+    .faction-icon { font-size:2rem; flex-shrink:0; filter:drop-shadow(0 0 6px rgba(0,180,216,0.3)); }
+    .faction-name { font-family:'Orbitron',monospace; font-size:0.9rem; color:var(--snow); margin-bottom:0.3rem; }
+    .faction-desc { font-size:0.88rem; color:rgba(212,207,199,0.6); line-height:1.55; }
+    .faction-threat {
+      margin-top:0.5rem; font-family:'Share Tech Mono',monospace; font-size:0.62rem;
+      letter-spacing:0.1em;
+    }
+
+    /* SHADOW ENTITY CARDS */
+    .shadow-card {
+      background: rgba(30,0,10,0.7);
+      border:1px solid rgba(230,57,70,0.2);
+      padding:1.3rem; margin:1rem 0;
+      position:relative;
+    }
+    .shadow-card::before {
+      content:'';position:absolute;top:0;left:0;width:2px;height:100%;
+      background:linear-gradient(to bottom, var(--danger), transparent);
+    }
+    .shadow-name { font-family:'Orbitron',monospace; font-size:1rem; color:var(--danger); margin-bottom:0.4rem; }
+    .shadow-desc { font-size:0.9rem; color:rgba(212,207,199,0.65); line-height:1.6; }
+
+    /* INFECTION METER */
+    .infection-meter {
+      background: rgba(4,12,18,0.9);
+      border:1px solid rgba(0,180,216,0.2);
+      padding:1.2rem; margin:2rem 0;
+      font-family:'Share Tech Mono',monospace;
+    }
+    .meter-label { font-size:0.68rem; color:var(--agency); letter-spacing:0.25em; text-transform:uppercase; margin-bottom:0.8rem; }
+    .meter-bar { height:6px; background:rgba(255,255,255,0.08); position:relative; }
+    .meter-fill {
+      height:100%; position:absolute; left:0; top:0;
+      transition:width 1s ease;
+    }
+    .meter-val { margin-top:0.5rem; font-size:0.72rem; color:rgba(212,207,199,0.5); }
+
+    /* QUOTE */
+    blockquote {
+      border-left:3px solid rgba(0,180,216,0.5);
+      margin:2rem 0; padding:1rem 1.5rem;
+      background:rgba(0,20,35,0.4);
+      font-style:italic; font-size:1.15rem; color:var(--snow);
+      position:relative;
+    }
+    blockquote::before {
+      content:'"'; font-size:3.5rem; color:rgba(0,180,216,0.15);
+      position:absolute; top:-0.8rem; left:0.8rem; line-height:1;
+      font-family:Georgia,serif;
+    }
+
+    /* FOOTER */
+    footer {
+      border-top:1px solid rgba(0,180,216,0.1);
+      padding:3rem 2rem; text-align:center;
+      font-family:'Share Tech Mono',monospace;
+      font-size:0.65rem; letter-spacing:0.15em;
+      color:rgba(212,207,199,0.2);
+      margin-top:6rem;
+    }
+
+    /* KEYFRAMES */
+    @keyframes fadeUp { from{opacity:0;transform:translateY(16px)} to{opacity:1;transform:translateY(0)} }
+    @keyframes pulse { 0%,100%{opacity:0.3} 50%{opacity:0.9} }
+
+    /* NAV */
+    nav {
+      position:fixed; top:0; left:0; right:0; z-index:100;
+      background:rgba(6,8,12,0.92);
+      backdrop-filter:blur(8px);
+      border-bottom:1px solid rgba(0,180,216,0.12);
+      padding:0.7rem 2rem;
+      display:flex; align-items:center; gap:2rem;
+    }
+    nav .nav-logo {
+      font-family:'Orbitron',monospace; font-weight:900; font-size:0.8rem;
+      color:var(--agency); letter-spacing:0.12em; flex-shrink:0;
+    }
+    nav .nav-links {
+      display:flex; gap:1.5rem; list-style:none;
+      font-family:'Share Tech Mono',monospace; font-size:0.65rem; letter-spacing:0.1em;
+    }
+    nav .nav-links a {
+      color:rgba(212,207,199,0.4); text-decoration:none;
+      transition:color 0.2s;
+    }
+    nav .nav-links a:hover { color:var(--agency); }
+    nav .nav-right {
+      margin-left:auto;
+      font-family:'Share Tech Mono',monospace; font-size:0.62rem;
+      color:rgba(0,180,216,0.4); letter-spacing:0.1em;
+    }
+
+    /* DROPDOWN MENUS */
+    nav .nav-links li { position: relative; }
+    nav .nav-links li > a { display:flex; align-items:center; gap:0.3em; }
+    nav .nav-links li > a .caret {
+      font-size:0.5rem; color:rgba(0,180,216,0.4);
+      transition: transform 0.2s, color 0.2s;
+      line-height:1;
+    }
+    nav .nav-links li:hover > a .caret { transform: rotate(180deg); color:var(--agency); }
+
+    .nav-dropdown {
+      display: none;
+      position: absolute;
+      top: calc(100% + 0.7rem);
+      left: 50%;
+      transform: translateX(-50%);
+      min-width: 220px;
+      background: rgba(6,8,12,0.97);
+      border: 1px solid rgba(0,180,216,0.18);
+      border-top: 2px solid var(--agency);
+      backdrop-filter: blur(12px);
+      z-index: 200;
+      padding: 0.4rem 0;
+    }
+    /* Invisible bridge to prevent hover gap */
+    .nav-dropdown::before {
+      content: '';
+      position: absolute;
+      top: -0.8rem;
+      left: 0; right: 0;
+      height: 0.8rem;
+    }
+    nav .nav-links li:hover .nav-dropdown { display: block; }
+
+    .nav-dropdown-label {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 0.55rem;
+      letter-spacing: 0.35em;
+      color: var(--agency-dim);
+      text-transform: uppercase;
+      padding: 0.5rem 1rem 0.25rem;
+      border-bottom: 1px solid rgba(0,180,216,0.1);
+      margin-bottom: 0.2rem;
+    }
+    .nav-dropdown a {
+      display: flex;
+      align-items: baseline;
+      gap: 0.7rem;
+      padding: 0.45rem 1rem;
+      color: rgba(212,207,199,0.5) !important;
+      font-size: 0.63rem !important;
+      letter-spacing: 0.08em;
+      text-decoration: none;
+      transition: background 0.15s, color 0.15s, padding-left 0.15s;
+    }
+    .nav-dropdown a:hover {
+      background: rgba(0,180,216,0.06);
+      color: var(--agency) !important;
+      padding-left: 1.3rem;
+    }
+    .nav-dropdown a .dd-num {
+      font-size: 0.55rem;
+      color: rgba(0,180,216,0.3);
+      flex-shrink: 0;
+      font-family: 'Share Tech Mono', monospace;
+    }
+    .nav-dropdown a:hover .dd-num { color: var(--agency); }
+    .nav-dropdown .dd-coming {
+      padding: 0.4rem 1rem;
+      color: rgba(212,207,199,0.18);
+      font-size: 0.6rem;
+      letter-spacing: 0.08em;
+      font-style: italic;
+      cursor: default;
+    }
+
+    /* horizontal separator with text */
+    .section-break {
+      display:flex; align-items:center; gap:1rem;
+      margin:4rem 0 2rem;
+    }
+    .section-break-line { flex:1; height:1px; background:rgba(0,180,216,0.15); }
+    .section-break-text {
+      font-family:'Share Tech Mono',monospace; font-size:0.65rem;
+      letter-spacing:0.3em; color:var(--agency); text-transform:uppercase;
+    }
+  </style>
+</head>
+<body>
+
+<!-- SNOW -->
+<div class="snow" id="snow"></div>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-logo">AGENCY // WAVE-2</div>
+  <ul class="nav-links">
+    <li>
+      <a href="#audio-playback">Audio Playback <span class="caret">▼</span></a>
+      <div class="nav-dropdown">
+        <div class="nav-dropdown-label">// Agent Watch — Logs</div>
+        <a href="#audio-log-001"><span class="dd-num">LOG #001</span> Prologue · Sector 7-Delta</a>
+        <div class="dd-coming">LOG #002 — Incoming transmission…</div>
+        <div class="dd-coming">LOG #003 — Incoming transmission…</div>
+      </div>
+    </li>
+    <li>
+      <a href="#chapter-1">Story <span class="caret">▼</span></a>
+      <div class="nav-dropdown">
+        <div class="nav-dropdown-label">// Chapters</div>
+        <a href="#audio-log-001"><span class="dd-num">00</span> Prologue · Audio Log #001</a>
+        <a href="#chapter-1"><span class="dd-num">01</span> The Arrival</a>
+        <a href="#chapter-2"><span class="dd-num">02</span> The Long Walk</a>
+        <a href="#chapter-3"><span class="dd-num">03</span> Calm before the Storm</a>
+        <div class="dd-coming">04 — Coming soon…</div>
+      </div>
+    </li>
+    <li><a href="#intel">Background</a></li>
+    <li><a href="#Dossier">Dossier</a></li>
+    <li><a href="#threats">People of Interest</a></li>
+  </ul>
+  <div class="nav-right">EDEN-227 // Squad Status: Active</div>
+</nav>
+
+<!-- ══════════ HERO ══════════ -->
+<section class="hero">
+  <div class="hero-bg"></div>
+  <div class="hero-scan"></div>
+
+  <div class="agency-badge">THE AGENCY · WAVE-2 DEPLOYMENT</div>
+  <h1 class="hero-title">The Journey<br>Through Eden</h1>
+  <p class="hero-sub">Eden-227 · Eternal Winter · Active Hostile Zone</p>
+  <p class="hero-tagline">A world frozen by sabotage. A planet abandoned by order. A squad of Agents stranded and forgotten — left to survive, or die, on a world that was never theirs to begin with.</p>
+
+  <div class="hud">
+    <div class="hud-stat planet">PLANET: <span>EDEN-227</span></div>
+    <div class="hud-stat">TEMP: <span>−46.2°C</span></div>
+    <div class="hud-stat crit">DROPSHIP Status: <span>DESTROYED</span></div>
+    <div class="hud-stat ok">INFECTION Status: <span>Uninfected</span></div>
+    <div class="hud-stat objective">Objective: <span>Survive</span></div>
+  </div>
+
+  <div class="scroll-cue">
+    <div class="scroll-cue-line"></div>
+    <span>begin briefing</span>
+  </div>
+</section>
+
+  <!-- ══════════ MAIN ══════════ -->
+<main id="audio-playback">
+<div class="container">
+
+  <!-- Prologue — Audio Playback - The Crash -->
+  <div id="audio-log-001" class="chapter" data-ch>
+    <div class="ch-header">
+      <div class="ch-num">00</div>
+      <div class="ch-meta">
+        <div class="ch-label">Agent Watch · Audio Log #001</div>
+        <div class="ch-title">Audio Playback</div>
+      </div>
+    </div>
+
+    <div class="terminal" data-label="// AGENT WATCH — AUDIO LOG #001">
+      <div class="t-line t-info">Incoming transmission; Audio playback starting now.</div>
+      <div class="t-line t-mute">Origin: Field Unit, Sector 7-Delta, Cindermark</div>
+      <div class="t-line t-mute">Recording timestamp: Day 37 post-Collapse</div>
+    </div>
+
+    <div class="prose">
+      <p>This world lay waste in white — frozen yet decaying in this hell called Eden. Truly ironic of name. A paradise that was never meant to be, yet here we are. Forced to fix a problem that could have been avoided.</p>
+      <p>I still think to myself: <i>Would it have been better if I hadn’t taken this request?</i></p>
+      <p>The wind howling across the ruins of what used to be Sector 7-Delta, a commercial district that once housed over fifty thousand souls. Now, what remains is just twisted metal and ice-encrusted concrete, a monument to the Collapse that claimed this world. Thirty-seven days ago, the Neo-Thermal Generators went offline. Thirty-six days ago, the eternal winter began.</p>
+      <p>We got shipped a month ago to provide security and evacuation protocols — but the evac ship we were supposed to get on got blown to bits, courtesy of the damn scavengers. So now… my division wanders around this vast frozen —</p>
+    </div>
+
+    <div class="dialogue">
+      <span class="speaker">An Energetic Voice</span>
+      "Hey, are you still doing a monologue?"
+    </div>
+
+    <div class="prose">
+      <p>I glance up from where I'm sitting, balanced on a chunk of collapsed overpass. It's Jake — the youngest in our division — grinning under his thermal mask, breath misting in the frigid air. He's been trying to strike up a conversation with me since we got here. I don't know if it's his attempt to break the ice or just his personality, but either way, he's been... persistent. Eighteen years old and still thinks everything's an adventure. Sometimes I envy that. Other times, I wonder how he's managed to stay alive this long with that attitude.</p>
+    </div>
+
+    <div class="dialogue">
+      <span class="speaker">LEAD [NARRATOR]</span>
+      "Really. You just had to cut me off mid sentence?"
+    </div>
+    <div class="dialogue">
+      <span class="speaker">JAKE</span>
+      "Yo, my name's Jake, Jake the Paragon Advocate, but call me Jake."
+    </div>
+    <div class="dialogue">
+      <span class="speaker">LEAD</span>
+      "You know, we're supposed to keep our identities a secret since we're on this type of mission."
+    </div>
+
+    <div class="prose">
+      <p><i>I don’t know what to do with this kid. At least he listens better than he acts — for kids his age, especially the ones at the AGENCY.</i> Getting up from a pile of crates marked with faded Ulacylon Megagroup logos, I stretch my legs and walk toward the chatting group positioned further along the ruins. Jake bolts past me before I take any step, leaving fresh shoe prints in the snow.</p>
+      <p>The makeshift camp we’ve established isn’t much — a clearing in the ruins, protected on three sides by collapsed buildings, with a clear sightline to the main thoroughfare. A standard tactical positioning, except nothing about this mission has been standard so far. We’ve been holed up here for six hours, long enough for the team to start getting restless. But if that wasn’t enough, we’ve been stranded on the winter abomination for a month, Month. This job was suppose to be a quick easy in and out job, not freeze, shot, and beat to death mission.</p>
+      <p>The group was split in two. Over by a crumbling wall, Daniel, Erika, Rose, and Shin are deep in a discussion about off-topic things and drinks — the kind of conversation you only have when you’re trying to forget where you are or if you’re done with the job type conversation.</p>
+    </div>
+
+    <div class="dialogue">
+      <span class="speaker">ERIC</span>
+      "Oh hey, it's boss."
+    </div>
+    <div class="dialogue">
+      <span class="speaker">LEAD</span>
+      "I think we've rested enough here. It's about time to head out."
+    </div>
+    <div class="dialogue">
+      <span class="speaker">ERIC</span>
+      "Sounds good, boss."
+    </div>
+
+    <div class="prose">
+      <p>The other cluster — Charlotte, Epoch, Aaron, and Clementine — are having a darker conversation. I catch the tail end of it as I cross over.</p>
+    </div>
+
+    <div class="dialogue">
+      <span class="speaker">EPOCH</span>
+      "I would be anywhere but here, in this nuclear winter wasteland."
+    </div>
+    <div class="dialogue">
+      <span class="speaker">AARON</span>
+      "The Collapse. The damned Collapse. If only Ulacylon fucking cared enough, we wouldn't have to clean their shit up, and I wouldn't have to be here."
+    </div>
+    <div class="dialogue">
+      <span class="speaker">CHARLOTTE</span>
+      "Come on now. There's no need to cry over spilled milk."
+    </div>
+    <div class="dialogue">
+      <span class="speaker">CLEMENTINE</span>
+      "Yet they sent us here with their equipment to clean up their mess."
+    </div>
+
+    <div class="prose">
+      <p>Aaron wasn't wrong. The Collapse wasn't natural. The Agency's own intelligence pointed toward deliberate sabotage — someone wanted Eden's generators offline. Someone with access, with motive, and with the kind of cold calculation that only a handful of people on this planet possess. The name floating around is <strong class="tag">VALORII</strong> — a Tier 5 agent from Wave 3. Rogue. Unpredictable. Believed to still be on Eden.</p>
+    </div>
+
+    <div class="terminal" data-label="// AGENT WATCH · SECTOR ALERT">
+      <div class="t-line t-crit">WARNING: MULTIPLE HOSTILES INBOUND</div>
+      <div class="t-line t-info">Origin: Hedgeline, northeast sector</div>
+      <div class="t-line t-warn">Count estimate: 10–16 units</div>
+      <div class="t-line t-warn">Classification: SCAVENGER (armed)</div>
+      <div class="t-line t-reikgon t-cursor">ADDITIONAL SIGNATURE DETECTED — REIKGON-CLASS ENTITY</div>
+    </div>
+
+    <div class="dialogue">
+      <span class="speaker">SHIN</span>
+      "Sorry to cut in — but we've got suspicious movement along the hedgeline."
+    </div>
+    <div class="dialogue">
+      <span class="speaker">LEAD</span>
+      "Battle positions — and put on your headsets."
+    </div>
+
+    <div class="prose">
+      <p>A hail of bullets starts spraying across the street, ricocheting, leaving craters in road and nearby buildings. A stray round catches a gas pump. The explosion lights the grey sky orange for half a second — and then, underneath the ringing, something else. A sound that has nothing to do with gunfire.</p>
+      <p>A shriek. Long, mournful, and utterly inhuman.</p>
+    </div>
+
+    <div class="dialogue">
+      <span class="speaker">JAKE</span>
+      "Ah, shit. Here we go again. We've got a crying boy."
+    </div>
+    <div class="dialogue">
+      <span class="speaker">AARON</span>
+      "These bastards angered a Sickler. As if this fight wasn't enough."
+    </div>
+    <div class="dialogue">
+      <span class="speaker">LEAD</span>
+      "I'm deploying Juggernaut Kit — buy me some time."
+    </div>
+
+    <div class="prose">
+      <p>I place the heavy box down on the ice, fingers moving fast. One eye on the display on my arm — the AGENT Watch. A countdown. A reminder I don't need: <em>sepsis clock ticking, extraction window open, ten days left.</em></p>
+      <p>I glance at the Watch. Forgot it was still transmitting.</p>
+    </div>
+
+    <div class="dialogue">
+      <span class="speaker">LEAD [TO WATCH FEED]</span>
+      "Fuck. I forgot this is still on. Well — see you on the other side, if—"
+    </div>
+
+    <div class="terminal" data-label="// TRANSMISSION STATUS">
+      <div class="t-line t-warn">Transmission ended. Playback complete.</div>
+      <div class="t-line t-mute">AGENT WATCH — AUDIO LOG #001</div>
+    </div>
+  </div>
+
+  <div class="divider"><div class="divider-line"></div><div class="divider-diamond"></div><div class="divider-line"></div></div>
+
+  <div id="story" style="height:0;visibility:hidden;"></div>
+
+  <!-- CHAPTER 1 -->
+  <div id="chapter-1" class="chapter" data-ch>
+    <div class="ch-header">
+      <div class="ch-num">01</div>
+      <div class="ch-meta">
+        <div class="ch-label">Chapter One · Start Here</div>
+        <div class="ch-title">The Arrival</div>
+      </div>
+    </div>
+
+    <div class="prose">
+      <p>The sound of snow layers crunching beneath my boots. My warm breath fogging in the air, there and gone.</p>
+    </div>
+
+    <div class="dialogue">
+      <span class="speaker">LEAD [NARRATOR]</span>
+      "This cold. Winter actually came."
+    </div>
+
+    <div class="prose">
+      <p>I stepped into the Agency's east courtyard. The cold breeze swept past my cheek, carrying nothing with it — no sound from the lower districts, no transit hum, just the stillness of early morning and the garden sitting there in front of me like it always did. I let out another slow breath and watched it disappear into the grey morning air.</p>
+      <p>The garden that shouldn't exist — and that was exactly why I kept coming back. Roses in winter. Grass that stayed green regardless of season. Hedges trimmed to a precision that no wind had disturbed. Trees bearing fruit in dead winter, silent and unbothered. There was something about that stillness — the fabricated order of it — that kept drawing me back out here, standing in the cold, thinking to myself: how does anything grow like this? Not just survive, but thrive, bloom, bear fruit, as if the seasons didn't exist. No one had ever given me a satisfying answer. Agency botanists had theories, atmospheric engineers had their own theories, but none of them held past the first question. Whatever kept this garden alive, <strong>New Earth</strong> wasn't explaining it — and that silence, somehow, felt more deliberate than the garden itself.</p>
+      <p>Eventually the garden's silence pressed in close enough that my eyes drifted upward, toward the city instead.</p>
+      <p><strong>Sovereignty</strong> rose behind the garden walls — tier upon tiers of glass and pale stone, the Capital of New Earth climbing toward a sky that had been scrubbed of smog through expensive atmospheric filters and considerable political will. The transit lines threaded between towers. Heating vents pushed white columns of steam into the air. Apartment windows caught the early light, and behind them, people were waking up to another ordinary day of not thinking about what existed beyond the planet's carefully maintained boundaries.</p>
+      <p><em>I used to envy that. Twelve years ago, maybe.</em></p>
+      <p>This was <strong>New Earth</strong> — home to many now, after the years of pollution built from innovation and a consistent lack of environmental conscience. That was the soft telling. The harder one went like this: Old Earth didn't deteriorate. It was consumed. The Corpo Wars leveraged every ecosystem as a battlefield asset until there was nothing left to leverage. All previous life, completely terminated. The history books called it a reset.</p>
+    </div>
+
+    <div class="lore-box">
+      <div class="lore-box-title">// New Earth — Context File</div>
+      <p>Constructed by the <strong>Ulacylon Megagroup Corporation</strong> following the Corpo Wars. Twice the landmass of any prior continent. Governed by corporate law. Capital city: <strong>Sovereignty</strong> — a tiered metropolitan structure built vertically, atmospheric filters keeping the sky perpetually clean. New Earth became the de facto home of humanity after Old Earth's termination.</p>
+      <p>It is not a democracy. It is not a republic. It is a product — maintained, curated, and owned.</p>
+    </div>
+
+    <div class="terminal" data-label="// CHAPTER STATUS">
+      <div class="t-line t-info">Location: New Earth — Agency East Courtyard, Sovereignty</div>
+      <div class="t-line t-mute">Timeline: Pre-deployment to Eden-227</div>
+      <div class="t-line t-ok">Status: Active Agent — Pre-Mission Briefing</div>
+      <div class="t-line t-cursor t-mute">Continued in Chapter 02 — The Long Walk</div>
+    </div>
+  </div>
+
+  <div class="divider"><div class="divider-line"></div><div class="divider-diamond"></div><div class="divider-line"></div></div>
+
+  <!-- LORE BRIEF -->
+  <div id="chapter-2" class="chapter" data-ch>
+    <div class="ch-header">
+      <div class="ch-num">02</div>
+      <div class="ch-meta">
+        <div class="ch-label">Chapter Two · The Journey Continues</div>
+        <div class="ch-title">The Long Walk</div>
+      </div>
+    </div>
+    <div class="terminal" data-label="// CHAPTER STATUS">
+      <div class="t-line t-warn">Chapter 02 — In progress</div>
+      <div class="t-line t-mute">Content uploading… stand by.</div>
+      <div class="t-line t-cursor t-mute">AGENT WATCH monitoring</div>
+    </div>
+  </div>
+
+  <div class="divider"><div class="divider-line"></div><div class="divider-diamond"></div><div class="divider-line"></div></div>
+
+  <div id="chapter-3" class="chapter" data-ch>
+    <div class="ch-header">
+      <div class="ch-num">03</div>
+      <div class="ch-meta">
+        <div class="ch-label">Chapter Three · Before the Storm</div>
+        <div class="ch-title">Calm before the Storm</div>
+      </div>
+    </div>
+    <div class="terminal" data-label="// CHAPTER STATUS">
+      <div class="t-line t-warn">Chapter 03 — In progress</div>
+      <div class="t-line t-mute">Content uploading… stand by.</div>
+      <div class="t-line t-cursor t-mute">AGENT WATCH monitoring</div>
+    </div>
+  </div>
+
+  <div class="divider"><div class="divider-line"></div><div class="divider-diamond"></div><div class="divider-line"></div></div>
+
+  <!-- LORE BRIEF -->
+  <div id="intel" class="chapter" data-ch>
+    <div class="ch-header">
+      <div class="ch-num">Background</div>
+      <div class="ch-meta">
+        <div class="ch-label">Intelligence Briefing</div>
+        <div class="ch-title">The Frozen World</div>
+      </div>
+    </div>
+
+    <div class="prose">
+      <p>In the far future, humanity has long since outgrown a single world. <strong>Old Earth</strong> died of its own making — wars and pollution terminated every living thing across its surface. In its place, the <strong>Ulacylon Megagroup Corporation</strong> rebuilt a new planet from scratch: <em>New Earth</em>, twice the size of any continent that came before, governed entirely by corporate law.</p>
+      <p>But New Earth was never the final frontier. For intergalactic expansion, humanity needed a midpoint between the Solar System and deeper space — and they found it in a distant system orbiting a dying white dwarf star designated <strong>227</strong>. On one of its planets, they built a civilization. They called the planet <strong>Eden</strong>.</p>
+    </div>
+
+    <div class="terminal" data-label="// PLANET FILE — EDEN-227">
+      <div class="t-line t-info">DESIGNATION: Eden-227</div>
+      <div class="t-line t-info">STAR CLASS: White Dwarf (System-227)</div>
+      <div class="t-line t-warn">STELLAR HEAT OUTPUT: INSUFFICIENT FOR HABITATION</div>
+      <div class="t-line t-ok">NEO-THERMAL GENERATORS: Previously deployed planet-wide</div>
+      <div class="t-line t-crit">CURRENT GENERATOR STATUS: OFFLINE — CAUSE: THE COLLAPSE</div>
+      <div class="t-line t-crit">SURFACE TEMPERATURE: −28°C (DROPPING)</div>
+      <div class="t-line t-mute">Currency: Odens / Bonds (non-transferable off-world)</div>
+      <div class="t-line t-mute">Government Status: Single planetary nation — collapsed</div>
+    </div>
+
+    <div class="prose">
+      <p><strong>The Collapse.</strong> Someone deliberately sabotaged Eden's Neo-Thermal Generator network. Without them, the planet plunged into a permanent winter. <em>Eternal cold. Endless storm.</em> The Agency's third wave of Agents — led by the formidable <strong>Valorii</strong> and the rogue-turned-scavenger-king <strong>Yosef</strong> — conducted emergency evacuations. Most civilians were pulled off-planet. Most.</p>
+    </div>
+
+    <div class="infection-meter">
+      <div class="meter-label">// SYSTEMIC INFECTION — Population Average Eden-227</div>
+      <div class="meter-bar">
+        <div class="meter-fill" style="width:66%; background:linear-gradient(to right, #4ADE80, #FFB703, #ff0303);"></div>
+      </div>
+      <div class="meter-val"> Percentage 66% — Moderate. Decontamination and Liquidation protocols recommended.</div>
+    </div>
+      
+    <div class="prose">
+      <p>What remained was a lawless, ice-choked world full of scavengers, organized raiders, shadow-cults, and something older and darker that had been festering on Eden long before the lights went out. The <strong>Eden Restoration Unit (ERU)</strong>, a private military company, moved in to "restore order" — which in practice meant shooting anyone who moved.</p>
+      <p>Into this hell, the Agency sent the second wave. That was us.</p>
+    </div>
+  </div>
+
+  <div class="divider"><div class="divider-line"></div><div class="divider-diamond"></div><div class="divider-line"></div></div>
+
+  <!-- Dossier -->
+  <div id="Dossier" class="chapter" data-ch>
+    <div class="ch-header">
+      <div class="ch-num">Dossier</div>
+      <div class="ch-meta">
+        <div class="ch-label">Squad File // Wave-2 Division</div>
+        <div class="ch-title">Personnel on Ground</div>
+      </div>
+    </div>
+
+    <div class="prose"><p>What's left of the fourth wave isn't a large unit. Ten agents, one crashed dropship, and zero backup. Here's what we're working with:</p></div>
+
+    <div class="char-grid">
+      <div class="char-card">
+        <div class="char-role">Division Lead</div>
+        <div class="char-name">THE LEAD</div>
+        <div class="char-desc">The narrator. Keeps the unit together through force of presence. Has a bad habit of monologuing when things get quiet.</div>
+        <div class="char-status status-active">◆ ACTIVE</div>
+      </div>
+      <div class="char-card">
+        <div class="char-role">Scout</div>
+        <div class="char-name">JAKE "PARAGON Advocate"</div>
+        <div class="char-desc">Young, loud, and tactically reckless. Ignores identity protocol. Somehow never gets hit. The unit's bad luck charm that keeps not dying.</div>
+        <div class="char-status status-active">◆ ACTIVE</div>
+      </div>
+      <div class="char-card">
+        <div class="char-role">Frontline</div>
+        <div class="char-name">ERIC</div>
+        <div class="char-desc">Reliable, cheerful under pressure. Has strong opinions about off-world stimulants. First to notice the Lead approaching, always.</div>
+        <div class="char-status status-active">◆ ACTIVE</div>
+      </div>
+      <div class="char-card">
+        <div class="char-role">Medic Support</div>
+        <div class="char-name">ERIKA</div>
+        <div class="char-desc">Calm, clinical. Hates the idea of recreational drug use. Keeps the squad's infection levels in check with stubborn medical discipline.</div>
+        <div class="char-status status-active">◆ ACTIVE — MINOR WOUND</div>
+      </div>
+      <div class="char-card">
+        <div class="char-role">Recon</div>
+        <div class="char-name">ROSE</div>
+        <div class="char-desc">Calm under fire, sharp-tongued off it. Smokes Koldera Blacks to settle the nerves. Not above mocking Eric mid-firefight.</div>
+        <div class="char-status status-active">◆ ACTIVE</div>
+      </div>
+      <div class="char-card">
+        <div class="char-role">Tech / Watch</div>
+        <div class="char-name">SHIN</div>
+        <div class="char-desc">Monitors the AGENT Watch feeds and sector alerts. First to detect incoming hostiles. Quiet until something's wrong.</div>
+        <div class="char-status status-active">◆ ACTIVE</div>
+      </div>
+      <div class="char-card">
+        <div class="char-role">Tactician</div>
+        <div class="char-name">CHARLOTTE</div>
+        <div class="char-desc">Level-headed and de-escalating by instinct. Keeps Aaron from spiraling. The unit's emotional anchor in the absence of any good news.</div>
+        <div class="char-status status-active">◆ ACTIVE</div>
+      </div>
+      <div class="char-card">
+        <div class="char-role">Soldier</div>
+        <div class="char-name">EPOCH</div>
+        <div class="char-desc">Would rather be anywhere else. Keeps saying it. Still here. Has incorrectly called the Systemic Infection a zombie plague three times.</div>
+        <div class="char-status status-active">◆ ACTIVE</div>
+      </div>
+      <div class="char-card">
+        <div class="char-role">Heavy Weapons</div>
+        <div class="char-name">AARON</div>
+        <div class="char-desc">Bitter about Ulacylon, the Collapse, and being here. Not wrong about any of it. Channels fury into being extremely good at suppressive fire.</div>
+        <div class="char-status status-active">◆ ACTIVE</div>
+      </div>
+      <div class="char-card">
+        <div class="char-role">Specialist</div>
+        <div class="char-name">CLEMENTINE</div>
+        <div class="char-desc">Pragmatic. Noted that they came equipped with Ulacylon tech to fix Ulacylon's mess. The irony isn't lost on her and she won't let anyone forget it.</div>
+        <div class="char-status status-active">◆ ACTIVE</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PERSONS OF INTEREST -->
+  <div id="threats" class="chapter" data-ch>
+    <div class="ch-header">
+      <div class="ch-num">Threats</div>
+      <div class="ch-meta">
+        <div class="ch-label">AGENT Watch // Persons of Interest</div>
+        <div class="ch-title">Who Wants You Dead</div>
+      </div>
+    </div>
+
+    <div class="prose"><p>Eden is full of threats. Here's what the AGENT Watch classifies as <strong>Priority Targets and Persons of Interest</strong> for Wave 4:</p></div>
+
+    <div class="section-break">
+      <div class="section-break-line"></div>
+      <div class="section-break-text">Ex-Agency</div>
+      <div class="section-break-line"></div>
+    </div>
+
+    <div class="faction">
+      <div class="faction-icon">🎯</div>
+      <div>
+        <div class="faction-name">VALORII — Rogue Agent, Wave 3</div>
+        <div class="faction-desc">Half-German, half-American. Psychopathic in nature, charming on the surface, and allegedly incapable of feeling happiness. Wields a stolen, modded A.J.M 9 burst pistol and a perk designation called "LOKI" — details classified, even from us. She's believed to have caused The Collapse. She's currently on Eden running a scavenger-killing bounty spree to climb the Agency's ranks. In the Agency's eyes she's rogue. In her own eyes, she's just working harder than anyone else.</div>
+        <div class="faction-threat t-crit">◆ THREAT: EXTREME — Approach only if survival is already compromised</div>
+      </div>
+    </div>
+
+    <div class="faction">
+      <div class="faction-icon">💪</div>
+      <div>
+        <div class="faction-name">YOSEF — Ex-Agent, Wave 3 Defector</div>
+        <div class="faction-desc">Russian ex-military, built like a weapon, hates augmentations on principle and uses raw strength instead. Carries an M60-E6 and a lost Desert Eagle somewhere on Eden. Wears a skull bandanna he found scavenging. Valorii mocked him for it. He leads the largest organized Scavenger group on the planet. Whether he was abandoned by the Agency or left voluntarily is the question nobody's answered yet — the Agency says he's Wanted. He hasn't come for us. Yet.</div>
+        <div class="faction-threat t-warn">◆ THREAT: HIGH — Currently neutral to Wave 4. Do not antagonize.</div>
+      </div>
+    </div>
+
+    <div class="section-break">
+      <div class="section-break-line"></div>
+      <div class="section-break-text">Neutral Factions</div>
+      <div class="section-break-line"></div>
+    </div>
+
+    <div class="faction">
+      <div class="faction-icon">👑</div>
+      <div>
+        <div class="faction-name">AILA "Sledge Queen" — Former Raiders</div>
+        <div class="faction-desc">Eden-born firefighter, current de facto leader of the Former Raiders after splitting from the main Raider faction. Earned her name cracking a scavenger leader called Jameson with a hammer, and from the bloodied crown she wears because she found it and thought it was funny. Her Knuckleboom wrist augmentation was taken from an overzealous Arbiter agent she killed in self-defense. Her group — firefighters, ex-military, riot-trained — is the closest thing to organized law enforcement left on Eden. They're neutral. Neutral means they won't kill you first.</div>
+        <div class="faction-threat" style="color:var(--agency)">◆ THREAT: MODERATE — Neutral unless provoked. High-Value Target per Agency records.</div>
+      </div>
+    </div>
+
+    <div class="section-break">
+      <div class="section-break-line"></div>
+      <div class="section-break-text">Active Hostiles</div>
+      <div class="section-break-line"></div>
+    </div>
+
+    <div class="faction">
+      <div class="faction-icon">⚔️</div>
+      <div>
+        <div class="faction-name">EDEN RESTORATION UNIT (ERU)</div>
+        <div class="faction-desc">Private military company. Arrived after Wave 4 crashed — which may or may not be a coincidence. Mission objective: clear the planet, restart civilization, eliminate anyone deemed "unauthorized." That includes us. They are among the most skilled combatants on Eden, better equipped than anyone except perhaps Valorii herself. The anti-air systems that shot our dropship down? Likely theirs.</div>
+        <div class="faction-threat t-crit">◆ THREAT: EXTREME — Hostile to all. No negotiation protocol on record.</div>
+      </div>
+    </div>
+
+    <div class="faction">
+      <div class="faction-icon">🕷️</div>
+      <div>
+        <div class="faction-name">SIN — Cult of Reikgon</div>
+        <div class="faction-desc">A cult that predates the Collapse, centered around the entity known as Reikgon. Brainwashed followers, willing converts, and desperate people who had nowhere else to go. They've taken control of Agency Facility E-6 among other strongholds. The Cultists and Reikgon's Shadows share the same faction — which means they don't attack each other. That arrangement has been confirmed by observation. The reason for it is not yet understood.</div>
+        <div class="faction-threat t-crit">◆ THREAT: HIGH — Do not approach Facility E-6 without full unit.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="divider"><div class="divider-line"></div><div class="divider-diamond"></div><div class="divider-line"></div></div>
+
+  <!-- SHADOW DOSSIER -->
+  <div class="chapter" data-ch>
+    <div class="ch-header">
+      <div class="ch-num">Shadows</div>
+      <div class="ch-meta">
+        <div class="ch-label">Entity Dossier // Classified</div>
+        <div class="ch-title">Reikgon's Shadows</div>
+      </div>
+    </div>
+
+    <div class="lore-box">
+      <div class="lore-box-title">// REIKGON — Entity Overview</div>
+      <p>An entity of unknown nature and origin. Not confirmed human. Not confirmed supernatural. Known objective: the total demise of everything on Eden. Creates "Shadows" — abominations fused with a live human host — to carry out its will. The host dies when the Shadow dies. Whether the hosts were once civilians, scavengers, or willing participants remains unknown. We could be killing innocent people. We don't get the luxury of hesitating about it.</p>
+    </div>
+
+    <div class="shadow-card">
+      <div class="shadow-name">THE SICKLER</div>
+      <div class="shadow-desc">Extremely aggressive, but in its docile state — deeply, audibly sad. It wanders slowly, sobbing to itself. Do not approach. Do not make loud noise near it. The moment it detects disturbance, its restraining chains break off and it enters a full rage state, pursuing every living thing on the map with inhuman speed and health. The Sickler has a sadistic urge to mutilate — slashing throats, dealing catastrophic damage with relentless intensity. The scavengers who triggered it outside our position learned this the hard way.</div>
+    </div>
+
+    <div class="shadow-card">
+      <div class="shadow-name">THE SKINNER</div>
+      <div class="shadow-desc">A psychologically sophisticated predator. It hides within a human host and mimics a weak, vulnerable scavenger — deliberately appearing as easy prey to lure stronger targets close. When a victim is within striking range, it reveals its true form with an ear-splitting scream designed to shock before it attacks with a massive spiked limb. The screaming-before-killing is tactical. It is not mindless. Treat any lone, disheveled-looking figure with extreme caution.</div>
+    </div>
+
+    <div class="shadow-card">
+      <div class="shadow-name">THE HANGER</div>
+      <div class="shadow-desc">Psychological warfare given form. Short exposure causes thoughts of giving up; extended exposure can be lethal in mentally fragile individuals. Its key attack forces the victim's own hand to act against them — a psychic compulsion that can be fought off with significant effort. Notably: Hanger reserves particular hatred for Apostle Agents, calling them "traitors" and abandoning its usual methods to attack physically instead. Agents classified as "Damned" appear to be fully immune to the Hanger's psychological effects.</div>
+    </div>
+
+    <div class="shadow-card">
+      <div class="shadow-name">THE HIDDEN</div>
+      <div class="shadow-desc">Invisible. Whispers from the dark as a method of psychological torment before closing in to slash the throat. It turns briefly visible during the moment of attack — the only window to retaliate. Weak by Shadow standards, but its invisibility makes every engagement a gamble. If you are hearing whispers and no one is speaking — do not move. Wait for the flash of visible form. Do not swing blindly.</div>
+    </div>
+
+    <div class="terminal" data-label="// APOSTLE CLASSIFICATION — NOTE">
+      <div class="t-line t-warn">Apostles: Agents with a severed connection to Reikgon</div>
+      <div class="t-line t-info">Referred to as "heretics" and "traitors" by Hanger entity</div>
+      <div class="t-line t-mute">They "know things others don't" — source unverified</div>
+      <div class="t-line t-crit">Presence of Apostle Agent in squad may provoke additional Shadow targeting</div>
+    </div>
+  </div>
+
+  <div class="divider"><div class="divider-line"></div><div class="divider-diamond"></div><div class="divider-line"></div></div>
+
+</div><!-- end container -->
+</main>
+
+<!-- FOOTER -->
+<footer>
+  <p>THE JOURNEY THROUGH EDEN · DECAYING WINTER UNIVERSE</p>
+  <p style="margin-top:0.5rem">Story intro by Elliott Suh · Lore sourced from Archeximus (Red) · Fan-made expanded narrative</p>
+  <p style="margin-top:0.5rem; opacity:0.4">Eden-227 is a world created for Decaying Winter on Roblox. All game lore belongs to its original creators.</p>
+</footer>
+
+<script>
+// SNOW
+const snowEl = document.getElementById('snow');
+for (let i = 0; i < 70; i++) {
+  const f = document.createElement('div');
+  f.className = 'flake';
+  const s = Math.random() * 2.5 + 0.8;
+  const dur = Math.random() * 18 + 10;
+  const del = -(Math.random() * 25);
+  const drift = (Math.random() - 0.5) * 120;
+  f.style.cssText = `
+    width:${s}px; height:${s}px;
+    left:${Math.random()*100}vw;
+    animation-duration:${dur}s;
+    animation-delay:${del}s;
+    --d:${drift}px;
+    opacity:${Math.random()*0.5+0.15};
+  `;
+  snowEl.appendChild(f);
+}
+
+// SCROLL REVEAL
+const obs = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if (e.isIntersecting) { e.target.classList.add('vis'); obs.unobserve(e.target); }
+  });
+}, { threshold: 0.07, rootMargin: '0px 0px -40px 0px' });
+document.querySelectorAll('[data-ch]').forEach(el => obs.observe(el));
+
+// INFECTION METER ANIMATE ON VISIBLE
+const meterObs = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      e.target.querySelector('.meter-fill').style.width = '66%';
+      meterObs.unobserve(e.target);
+    }
+  });
+});
+document.querySelectorAll('.infection-meter').forEach(el => {
+  el.querySelector('.meter-fill').style.width = '0%';
+  meterObs.observe(el);
+});
+</script>
+</body>
+</html>
